@@ -218,7 +218,10 @@
 				gridLineColor : (this.options.scaleShowGridLines) ? this.options.scaleGridLineColor : "rgba(0,0,0,0)",
 				padding : (this.options.showScale) ? 0 : (this.options.barShowStroke) ? this.options.barStrokeWidth : 0,
 				showLabels : this.options.scaleShowLabels,
-				display : this.options.showScale
+				display : this.options.showScale,
+				scaleXStartIndex: this.options.scaleXStartIndex,
+				scaleXEndIndex: this.options.scaleXEndIndex,
+				scaleXStepWidth: this.options.scaleXStepWidth
 			};
 
 			if (this.options.scaleOverride){

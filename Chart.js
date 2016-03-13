@@ -104,6 +104,14 @@
 			// String - Scale label font colour
 			scaleFontColor: "#666",
 
+			// Scale xLabels' configurations
+			// Number - start displaying x axis labels at index
+			scaleXStartIndex: 0,
+			// Number - end displaying x axis labels at index
+			scaleXEndIndex: Number.MAX_VALUE,
+			// Number - displaying x axis labels step width
+			scaleXStepWidth: 1,
+
 			// Boolean - whether or not the chart should be responsive and resize when the browser does.
 			responsive: false,
 
@@ -1649,8 +1657,16 @@
 
 			this.ctx.font = this.font;
 
-			var firstWidth = this.ctx.measureText(this.xLabels[0]).width,
-				lastWidth = this.ctx.measureText(this.xLabels[this.xLabels.length - 1]).width,
+			var displayXLabels = [];
+			for (var i = 0, l = this.xLabels.length; i < l; i++) {
+				if (i === this.scaleXStartIndex ||
+						i === this.scaleXEndIndex ||
+						(i >= this.scaleXStartIndex && i <= this.scaleXEndIndex &&
+						(i - this.scaleXStartIndex) % this.scaleXStepWidth === 0))
+					displayXLabels.push(this.xLabels[i]);
+			}
+			var firstWidth = this.ctx.measureText(displayXLabels[0]).width,
+				lastWidth = this.ctx.measureText(displayXLabels[displayXLabels.length - 1]).width,
 				firstRotated,
 				lastRotated;
 
@@ -1660,12 +1676,12 @@
 
 			this.xLabelRotation = 0;
 			if (this.display){
-				var originalLabelWidth = longestText(this.ctx,this.font,this.xLabels),
+				var originalLabelWidth = longestText(this.ctx,this.font,displayXLabels),
 					cosRotation,
 					firstRotatedWidth;
 				this.xLabelWidth = originalLabelWidth;
 				//Allow 3 pixels x2 padding either side for label readability
-				var xGridWidth = Math.floor(this.calculateX(1) - this.calculateX(0)) - 6;
+				var xGridWidth = Math.floor(this.calculateX(1, displayXLabels.length) - this.calculateX(0, displayXLabels.length)) - 6;
 
 				//Max label rotate should be 90 - also act as a loop counter
 				while ((this.xLabelWidth > xGridWidth && this.xLabelRotation === 0) || (this.xLabelWidth > xGridWidth && this.xLabelRotation <= 90 && this.xLabelRotation > 0)){
@@ -1706,11 +1722,11 @@
 			var scalingFactor = this.drawingArea() / (this.min - this.max);
 			return this.endPoint - (scalingFactor * (value - this.min));
 		},
-		calculateX : function(index){
+		calculateX : function(index, count){
 			var isRotated = (this.xLabelRotation > 0),
 				// innerWidth = (this.offsetGridLines) ? this.width - offsetLeft - this.padding : this.width - (offsetLeft + halfLabelWidth * 2) - this.padding,
 				innerWidth = this.width - (this.xScalePaddingLeft + this.xScalePaddingRight),
-				valueWidth = innerWidth/Math.max((this.valuesCount - ((this.offsetGridLines) ? 0 : 1)), 1),
+				valueWidth = innerWidth/Math.max(((count?count:this.valuesCount) - ((this.offsetGridLines) ? 0 : 1)), 1),
 				valueOffset = (valueWidth * index) + this.xScalePaddingLeft;
 
 			if (this.offsetGridLines){
@@ -1780,6 +1796,11 @@
 				},this);
 
 				each(this.xLabels,function(label,index){
+					if (!(index === this._saved.scaleXStartIndex ||
+							index === this._saved.scaleXEndIndex ||
+							(index >= this._saved.scaleXStartIndex && index <= this._saved.scaleXEndIndex &&
+							(index - this._saved.scaleXStartIndex) % this._saved.scaleXStepWidth === 0))) return;
+
 					var xPos = this.calculateX(index) + aliasPixel(this.lineWidth),
 						// Check to see if line/bar here and decide where to place the line
 						linePos = this.calculateX(index - (this.offsetGridLines ? 0.5 : 0)) + aliasPixel(this.lineWidth),
@@ -2470,7 +2491,10 @@
 				gridLineColor : (this.options.scaleShowGridLines) ? this.options.scaleGridLineColor : "rgba(0,0,0,0)",
 				padding : (this.options.showScale) ? 0 : (this.options.barShowStroke) ? this.options.barStrokeWidth : 0,
 				showLabels : this.options.scaleShowLabels,
-				display : this.options.showScale
+				display : this.options.showScale,
+				scaleXStartIndex: this.options.scaleXStartIndex,
+				scaleXEndIndex: this.options.scaleXEndIndex,
+				scaleXStepWidth: this.options.scaleXStepWidth
 			};
 
 			if (this.options.scaleOverride){
@@ -2958,7 +2982,10 @@
 				gridLineColor : (this.options.scaleShowGridLines) ? this.options.scaleGridLineColor : "rgba(0,0,0,0)",
 				padding: (this.options.showScale) ? 0 : this.options.pointDotRadius + this.options.pointDotStrokeWidth,
 				showLabels : this.options.scaleShowLabels,
-				display : this.options.showScale
+				display : this.options.showScale,
+				scaleXStartIndex: this.options.scaleXStartIndex,
+				scaleXEndIndex: this.options.scaleXEndIndex,
+				scaleXStepWidth: this.options.scaleXStepWidth
 			};
 
 			if (this.options.scaleOverride){
