@@ -124,6 +124,9 @@
 			// Boolean - Determines whether to draw built-in tooltip or call custom tooltip function
 			customTooltips: false,
 
+			// Boolean - whether show only one tool tip at a time
+			tooltipSingleton: false,
+
 			// Array - Array of string names to attach tooltip events
 			tooltipEvents: ["mousemove", "touchstart", "touchmove", "mouseout"],
 
@@ -1012,6 +1015,9 @@
 			// Only redraw the chart if we've actually changed what we're hovering on.
 			if (typeof this.activeElements === 'undefined') this.activeElements = [];
 
+			if (this.options.tooltipSingleton) {
+				ChartElements = ChartElements.slice(0, 1);
+			}
 			var isChanged = (function(Elements){
 				var changed = false;
 
